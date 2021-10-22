@@ -33,15 +33,12 @@ public class RotaNegociacao {
                         convertBodyTo(String.class).
                         unmarshal(new XStreamDataFormat(xstream)).
                         split(body()).
-                        process(new Processor() {
-                            @Override
-                            public void process(Exchange exchange) throws Exception {
-                                Negociacao negociacao = exchange.getIn().getBody(Negociacao.class);
-                                exchange.setProperty("preco", negociacao.getPreco());
-                                exchange.setProperty("quantidade", negociacao.getQuantidade());
-                                String data = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss").format(negociacao.getData().getTime());
-                                exchange.setProperty("data", data);
-                            }
+                        process(exchange -> {
+                            Negociacao negociacao = exchange.getIn().getBody(Negociacao.class);
+                            exchange.setProperty("preco", negociacao.getPreco());
+                            exchange.setProperty("quantidade", negociacao.getQuantidade());
+                            String data = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss").format(negociacao.getData().getTime());
+                            exchange.setProperty("data", data);
                         }).
                         setBody(simple("insert into negociacao(preco, quantidade, data) values (${property.preco}, ${property.quantidade}, '${property.data}')")).
                         log("${body}").
